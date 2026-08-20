@@ -34,5 +34,20 @@ window.STAMP_RECORDS = [
     image: `data/stamps/albania/albania-${number}.jpg?v=2`, status: 'visible',
     notes: 'Provisional match to Albania’s 1965 Flowers issue (Scott 968–975); this page shows seven of the eight values. Perforation and condition should be verified from the original stamp.',
     valuation: '$0.10–$1 each · catalogue refs $0.29–$2.93', valueConfidence: 'medium'
-  }))
+  })),
+  ...[
+    [13, '1867–1964', ['5 centavos', '5 centavos', '5 centavos', '20 centavos', '20 centavos', '40 centavos', '½ peso', '1 peso', '5 pesos', '10 centavos', '25 centavos', '10 centavos', '20 centavos', '20 centavos', '10 centavos', '80 centavos', '50 centavos official', '1 peso', '2 pesos', '50 centavos', '1 peso', '30 centavos', '40 centavos', '2 pesos', '5 pesos']],
+    [14, '1957–67', ['5 centavos official', '10 centavos', '20 centavos', '20 centavos', '1 peso', '2 pesos', '4 pesos', '3 pesos', '5 pesos', '8 pesos', '10 pesos', '1 peso', '2 pesos', '2 pesos', '4 pesos', '4 pesos', '6 pesos', '10 pesos', '12 pesos', '15 pesos', '20 pesos', '22 pesos', '22 pesos', '23 pesos', '25 pesos', '43 pesos', '45 pesos', '50 pesos', '90 pesos', '440 pesos', '240 pesos']],
+    [15, '1960–70', ['20 pesos']],
+    [16, 'Argentina / Armenia', ['3 pesos', '5 centavos', '20 centavos (Armenia)']]
+  ].flatMap(([pageSequence, heading, denominations]) => denominations.map((denomination, index) => ({
+    id: `argentina-${pageSequence}-${String(index + 1).padStart(2, '0')}`,
+    pageSequence, country: heading === 'Argentina / Armenia' ? 'Argentina / Armenia' : 'Argentina',
+    denomination, heading: `Argentina · ${heading} · stamp ${index + 1}`,
+    image: `data/stamps/argentina/argentina-${pageSequence}-${String(index + 1).padStart(2, '0')}.jpg?v=1`,
+    status: 'visible',
+    notes: `Mounted stamp extracted from the photographed Argentina section (${heading}). Identification is provisional; verify issue, perforation, watermark, cancellations, and condition before sale. StampWorld’s Argentina catalogue pages provide a useful comparison point, but catalogue/listing figures are not guaranteed resale prices.`,
+    valuation: pageSequence === 13 ? '$0.25–$3 each' : pageSequence === 14 ? '$0.10–$2 each' : '$0.10–$1 each',
+    valueConfidence: 'low'
+  })))
 ];
