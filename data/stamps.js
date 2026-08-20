@@ -49,5 +49,30 @@ window.STAMP_RECORDS = [
     notes: `Mounted stamp extracted from the photographed Argentina section (${heading}). Identification is provisional; verify issue, perforation, watermark, cancellations, and condition before sale. StampWorld’s Argentina catalogue pages provide a useful comparison point, but catalogue/listing figures are not guaranteed resale prices.`,
     valuation: pageSequence === 13 ? '$0.25–$3 each' : pageSequence === 14 ? '$0.10–$2 each' : '$0.10–$1 each',
     valueConfidence: 'low'
-  })))
+  }))),
+  ...[
+    [91, ['8,000 old yuan · 1949–50 PRC issue', '$5–$35 each', 'medium'], 'china-091-01'],
+    [92, ['500 old yuan · 1950–51 PRC issue', '$1–$12 each', 'low'], 'china-092-01'],
+    [92, ['5,000 old yuan · 1950–51 PRC issue', '$2–$35 each', 'low'], 'china-092-02'],
+    [92, ['100 old yuan · 1950–51 PRC issue', '$1–$12 each', 'low'], 'china-092-03'],
+    [92, ['150 old yuan · 1950–51 PRC issue', '$1–$12 each', 'low'], 'china-092-04'],
+    [93, ['8,000 old yuan · 1951–53 PRC issue', '$1–$20 each', 'low'], 'china-093-01'],
+    [94, ['25 fen · 1952–54 PRC issue', '$0.50–$15 each', 'low'], 'china-094-01'],
+    [106, ['3,000 old yuan · air post', '$0.50–$10 each', 'low'], 'china-106-01'],
+    [107, ['5,000 old yuan · 1st anniversary issue', '$2–$35 each', 'medium'], 'china-107-01'],
+    [107, ['5,000 old yuan · 1st anniversary issue', '$2–$35 each', 'medium'], 'china-107-02'],
+    [107, ['5,000 old yuan · 1st anniversary issue', '$2–$35 each', 'medium'], 'china-107-03'],
+    [111, ['40 fen · 1958–63 PRC issue · used/overprinted', '$0.25–$8 each', 'low'], 'china-111-01'],
+    [112, ['40 fen · 1964–70 PRC issue · used/overprinted', '$0.25–$8 each', 'low'], 'china-112-01'],
+    [112, ['40 fen · 1964–70 PRC issue · used/overprinted', '$0.25–$8 each', 'low'], 'china-112-02'],
+    [112, ['100 fen · 1964–70 PRC issue · used/overprinted', '$0.25–$8 each', 'low'], 'china-112-03'],
+    [112, ['50 fen · 1964–70 PRC issue · used/overprinted', '$0.25–$8 each', 'low'], 'china-112-05']
+  ].map(([pageSequence, [denomination, valuation, valueConfidence], imageName], index) => ({
+    id: `china-${pageSequence}-${String(index + 1).padStart(2, '0')}`,
+    pageSequence, country: 'China', denomination,
+    heading: `China · page ${pageSequence} · stamp ${index + 1}`,
+    image: `data/stamps/china/${imageName}.jpg?v=1`, status: 'visible',
+    notes: 'Mounted stamp extracted from the photographed China section. Identification and value are provisional; confirm the exact issue, paper, perforation, watermark, overprint, cancellation type, and condition against a specialist catalogue before sale.',
+    valuation, valueConfidence
+  }))
 ];
