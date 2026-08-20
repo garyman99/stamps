@@ -1,0 +1,38 @@
+// Records are created only for visibly populated stamp spaces or printed
+// country/reference illustrations. Blank album spaces are intentionally omitted.
+window.STAMP_RECORDS = [
+  { id: 'abu-dhabi-country-stamp', pageSequence: 3, country: 'Abu Dhabi', denomination: 'Country stamp / flag illustration', heading: 'Abu Dhabi · 1964–71', image: 'data/stamps/abu-dhabi-flag.jpg?v=2', status: 'reference', notes: 'Printed header illustration; not treated as a mounted postage stamp or valuation candidate.' },
+  { id: 'afghanistan-country-stamp', pageSequence: 4, country: 'Afghanistan', denomination: 'Country stamp / flag illustration', heading: 'Afghanistan · 1873–63', image: 'data/stamps/afghanistan-flag.jpg?v=1', status: 'reference', notes: 'Printed header illustration; not treated as a mounted postage stamp or valuation candidate.' },
+  { id: 'afghanistan-01', pageSequence: 4, country: 'Afghanistan', denomination: 'Printed album illustration · 2 PS', heading: 'Afghanistan · reference illustration', image: 'data/stamps/afghanistan/afghanistan-01.jpg?v=1', status: 'reference', notes: 'Printed album illustration, not a mounted stamp; excluded from the individual-stamp panel.' },
+  { id: 'afghanistan-02', pageSequence: 4, country: 'Afghanistan', denomination: 'Printed album illustration · 1 AF', heading: 'Afghanistan · reference illustration', image: 'data/stamps/afghanistan/afghanistan-02.jpg?v=1', status: 'reference', notes: 'Printed album illustration, not a mounted stamp; excluded from the individual-stamp panel.' },
+  { id: 'afghanistan-page5-01', pageSequence: 5, country: 'Afghanistan', denomination: '1 PS · 1962 Asian Games · likely Scott 599', heading: 'Afghanistan · visible stamp 1', image: 'data/stamps/afghanistan/afghanistan-page5-01.jpg?v=1', status: 'visible', notes: 'Provisional match to the 1962 Fourth Asian Games, Jakarta issue. The five-stamp group is likely Scott 599–603; confirm against a current catalogue before sale.', valuation: '$0.10–$1 each · set $0.50–$3', valueConfidence: 'medium' },
+  { id: 'afghanistan-page5-02', pageSequence: 5, country: 'Afghanistan', denomination: '2 PS · 1962 Asian Games · likely Scott 600', heading: 'Afghanistan · visible stamp 2', image: 'data/stamps/afghanistan/afghanistan-page5-02.jpg?v=1', status: 'visible', notes: 'Provisional match to the 1962 Fourth Asian Games, Jakarta issue. The five-stamp group is likely Scott 599–603; confirm against a current catalogue before sale.', valuation: '$0.10–$1 each · set $0.50–$3', valueConfidence: 'medium' },
+  { id: 'afghanistan-page5-03', pageSequence: 5, country: 'Afghanistan', denomination: '3 PS · 1962 Asian Games · likely Scott 601', heading: 'Afghanistan · visible stamp 3', image: 'data/stamps/afghanistan/afghanistan-page5-03.jpg?v=1', status: 'visible', notes: 'Provisional match to the 1962 Fourth Asian Games, Jakarta issue. The five-stamp group is likely Scott 599–603; confirm against a current catalogue before sale.', valuation: '$0.10–$1 each · set $0.50–$3', valueConfidence: 'medium' },
+  { id: 'afghanistan-page5-04', pageSequence: 5, country: 'Afghanistan', denomination: '4 PS · 1962 Asian Games · likely Scott 602', heading: 'Afghanistan · visible stamp 4', image: 'data/stamps/afghanistan/afghanistan-page5-04.jpg?v=1', status: 'visible', notes: 'Provisional match to the 1962 Fourth Asian Games, Jakarta issue. The five-stamp group is likely Scott 599–603; confirm against a current catalogue before sale.', valuation: '$0.10–$1 each · set $0.50–$3', valueConfidence: 'medium' },
+  { id: 'afghanistan-page5-05', pageSequence: 5, country: 'Afghanistan', denomination: '5 PS · 1962 Asian Games · likely Scott 603', heading: 'Afghanistan · visible stamp 5', image: 'data/stamps/afghanistan/afghanistan-page5-05.jpg?v=2', status: 'visible', notes: 'Provisional match to the 1962 Fourth Asian Games, Jakarta issue. The five-stamp group is likely Scott 599–603; confirm against a current catalogue before sale.', valuation: '$0.10–$1 each · set $0.50–$3', valueConfidence: 'medium' },
+  { id: 'ajman-country-stamp', pageSequence: 6, country: 'Ajman', denomination: 'Country stamp / flag illustration', heading: 'Ajman · 1964–65', image: 'data/stamps/ajman-flag.jpg?v=1', status: 'reference', notes: 'Printed header illustration; not treated as a mounted postage stamp or valuation candidate.' },
+  ...[
+    ['01', '1 NP'], ['02', '2 NP'], ['03', '3 NP'], ['04', '4 NP'], ['05', '5 NP'],
+    ['06', '10 NP'], ['07', '15 NP'], ['08', '20 NP'], ['09', '30 NP'],
+    ['10', '15 NP'], ['11', '25 NP'], ['12', '40 NP'], ['13', '1 R'],
+    ['14', '35 NP'], ['15', '50 NP'], ['16', '70 NP'], ['17', '1 R'],
+    ['18', '75 NP'], ['19', '1 R'], ['20', '150 NP'], ['21', '2 R'],
+    ['22', '2 R'], ['23', '3 R']
+  ].map(([number, denomination]) => ({
+    id: `ajman-${number}`, pageSequence: 6, country: 'Ajman', denomination,
+    heading: `Ajman · visible stamp ${number}`,
+    image: `data/stamps/ajman/ajman-${number}.jpg?v=1`, status: 'visible',
+    notes: 'Visible mounted stamp extracted from the photographed page. Provisional match to Ajman’s 1964–65 fauna/collector-era issues; exact catalogue number and authenticity still need confirmation.',
+    valuation: 'Usually under $1 each', valueConfidence: 'low'
+  })),
+  { id: 'albania-country-stamp', pageSequence: 8, country: 'Albania', denomination: 'Country stamp / flag illustration', heading: 'Albania · 1913–66', image: 'data/stamps/albania-flag.jpg?v=2', status: 'reference', notes: 'Printed header illustration; not treated as a mounted postage stamp or valuation candidate.' },
+  ...[
+    ['01', '1 L'], ['02', '2 L'], ['03', '3 L'], ['04', '3.50 L'], ['05', '4 L'], ['06', '4.50 L'], ['07', '5 L']
+  ].map(([number, denomination]) => ({
+    id: `albania-${number}`, pageSequence: 8, country: 'Albania', denomination,
+    heading: `Albania · visible stamp ${number}`,
+    image: `data/stamps/albania/albania-${number}.jpg?v=2`, status: 'visible',
+    notes: 'Provisional match to Albania’s 1965 Flowers issue (Scott 968–975); this page shows seven of the eight values. Perforation and condition should be verified from the original stamp.',
+    valuation: '$0.10–$1 each · catalogue refs $0.29–$2.93', valueConfidence: 'medium'
+  }))
+];

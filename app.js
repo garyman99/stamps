@@ -1,0 +1,58 @@
+(function(){
+  const pages = window.STAMP_PAGES || [];
+  const stampRecords = window.STAMP_RECORDS || [];
+  try { const saved = JSON.parse(localStorage.getItem('stamp-research-pages') || '{}'); if (saved._version === window.STAMP_RESEARCH_VERSION) pages.forEach(p => Object.assign(p, saved[p.sequence] || {})); } catch (e) { console.warn('Research data could not be loaded', e); }
+  const $ = (id) => document.getElementById(id);
+  const state = { filtered: pages.slice(), index: 0, researchMode: false, zoom: 1, panX: 0, panY: 0, dragging: false, dragStartX: 0, dragStartY: 0 };
+  const titleCase = (s) => s.replace(/\b\w/g, c => c.toUpperCase());
+  const getCountry = (p) => p.country || 'Unreviewed pages';
+  const getStatus = (p) => p.status || 'unreviewed';
+  function imagePath(p, full=false){ return (full ? 'data/raw/Stamp Collection/' : 'data/thumbs/Stamp Collection/') + encodeURIComponent(p.file); }
+  function applyCanvasTransform(){ $('modalImage').style.transform=`translate3d(${state.panX}px,${state.panY}px,0) scale(${state.zoom})`; $('resetZoom').textContent=state.zoom===1?'Reset view':`Reset view · ${Math.round(state.zoom*100)}%`; }
+  function resetCanvas(){ state.zoom=1; state.panX=0; state.panY=0; applyCanvasTransform(); }
+  function setCanvasImage(src, alt, label){ $('modalImage').src=src; $('modalImage').alt=alt; $('canvasLabel').textContent=label; resetCanvas(); }
+  function selectStamp(record){ setCanvasImage(record.image, `${record.country} ${record.denomination}`, `${record.country} · ${record.denomination}`); document.querySelectorAll('.stamp-card').forEach(card=>card.classList.toggle('selected', card.dataset.stampId===record.id)); }
+  function renderStampPanel(p){
+    const records=stampRecords.filter(s=>s.pageSequence===p.sequence && s.status==='visible');
+    const panel=$('stampPanel'), button=$('viewStamps');
+    button.classList.toggle('hidden', !records.length);
+    if(!records.length){ panel.classList.add('hidden'); panel.innerHTML=''; return; }
+    panel.classList.remove('hidden');
+    panel.innerHTML=`<div class="form-title">Visible stamp records · ${records.length}</div><p class="stamp-intro">Only visibly present stamp or reference illustrations are extracted. Empty album spaces are intentionally omitted. Potential values are research estimates, not appraisals; condition, gum, perforation, cancellations, authenticity, and buyer demand can change them substantially. Click a stamp to inspect it in the canvas.</p><div class="stamp-grid">${records.map(s=>`<article class="stamp-card" data-stamp-id="${s.id}" role="button" tabindex="0" aria-label="View ${s.country} ${s.denomination}"><img src="${s.image}" alt="${s.country} ${s.denomination}"/><div><strong>${s.denomination}</strong><span>${s.status}</span>${s.valuation ? `<p class="stamp-value"><b>Potential value</b> · ${s.valuation} <em>(${s.valueConfidence} confidence)</em></p>` : ''}<p>${s.notes}</p></div></article>`).join('')}</div>`;
+    panel.querySelectorAll('.stamp-card').forEach(card=>{ const record=records.find(s=>s.id===card.dataset.stampId); card.addEventListener('click',()=>selectStamp(record)); card.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();selectStamp(record);}}); });
+  }
+  function renderStats(){
+    const countries = new Set(pages.map(getCountry));
+    $('stats').innerHTML = `<div><strong>${pages.length}</strong><span>pages</span></div><div><strong>${countries.size}</strong><span>sections</span></div>`;
+    $('heroCount').textContent = pages.length;
+  }
+  function renderCountries(){
+    const groups = {};
+    state.filtered.forEach(p => { const c=getCountry(p); (groups[c] ||= []).push(p); });
+    const entries = Object.entries(groups).sort((a,b)=>a[0].localeCompare(b[0]));
+    $('countryView').innerHTML = entries.map(([country, list]) => `<article class="country-card" data-country="${country}"><div><span class="eyebrow">${list.length} page${list.length===1?'':'s'}</span><h4>${country}</h4></div><div><div class="foot"><span class="count">${list.filter(p=>getStatus(p)==='reviewed').length} reviewed</span><span>→</span></div><div class="bar"><i style="width:${Math.max(5,Math.round(list.filter(p=>getStatus(p)==='reviewed').length/list.length*100))}%"></i></div></div></article>`).join('');
+    document.querySelectorAll('.country-card').forEach(card=>card.addEventListener('click',()=>{ $('search').value=card.dataset.country; applyFilters(); showPages(); }));
+  }
+  function renderPages(){
+    $('pageView').innerHTML = state.filtered.map((p,i)=>`<article class="page-card" data-index="${pages.indexOf(p)}"><img loading="lazy" src="${imagePath(p)}" alt="${getCountry(p)} album page ${p.sequence}"/><div class="page-caption"><p><span class="status-dot"></span>${getStatus(p)==='reviewed'?'Reviewed':'Needs review'} · Page ${p.sequence}</p><h4>${getCountry(p)}</h4><p>${p.heading || 'Album page awaiting transcription'}</p></div></article>`).join('');
+    document.querySelectorAll('.page-card').forEach(card=>card.addEventListener('click',()=>openModal(Number(card.dataset.index))));
+  }
+  function applyFilters(){
+    const q=$('search').value.trim().toLowerCase(), filter=$('statusFilter').value;
+    state.filtered=pages.filter(p=>(!q || `${getCountry(p)} ${p.heading||''} ${p.sequence}`.toLowerCase().includes(q)) && (filter==='all'||getStatus(p)===filter));
+    renderCountries(); renderPages();
+  }
+  function showPages(){ $('countryView').classList.add('hidden'); $('pageView').classList.remove('hidden'); document.querySelector('[data-view="countries"]').classList.remove('active'); document.querySelector('[data-view="pages"]').classList.add('active'); }
+  function openModal(index){ state.index=index; const p=pages[index]; setCanvasImage(imagePath(p, true), `${getCountry(p)} album page ${p.sequence}`, 'Full page · original resolution'); $('modalSequence').textContent=`Album sequence · ${p.sequence}`; $('modalTitle').textContent=`${getCountry(p)} · page ${p.sequence}`; $('modalCountry').textContent=getCountry(p); $('modalResearch').textContent=getStatus(p)==='reviewed'?'Reviewed':'Needs review'; $('modalDescription').textContent=p.description || 'This page is preserved from the original album. Stamp-level identification, condition notes, and valuation evidence can be added here as research progresses.'; $('modalStatus').textContent=getStatus(p)==='reviewed'?'Reviewed':'Needs review'; $('editCountry').value=p.country==='Unreviewed pages'?'':p.country; $('editHeading').value=p.heading || ''; $('editStatus').value=getStatus(p); $('editNotes').value=p.description || ''; renderStampPanel(p); $('modal').classList.remove('hidden'); }
+  function exportResearch(){ const records={_version:window.STAMP_RESEARCH_VERSION}; pages.forEach(p=>{ if(p.country!=='Unreviewed pages'||p.heading||p.description||p.status==='reviewed') records[p.sequence]={country:p.country,heading:p.heading,status:p.status,description:p.description}; }); const blob=new Blob([JSON.stringify(records,null,2)],{type:'application/json'}); const url=URL.createObjectURL(blob); const a=document.createElement('a'); a.href=url; a.download='stamp-research.json'; a.click(); URL.revokeObjectURL(url); }
+  function importResearch(file){ if(!file) return; const reader=new FileReader(); reader.onload=()=>{ try { const records=JSON.parse(reader.result); pages.forEach(p=>Object.assign(p,records[p.sequence]||{})); localStorage.setItem('stamp-research-pages',JSON.stringify(records)); applyFilters(); } catch(e){ alert('That research file could not be read.'); } }; reader.readAsText(file); }
+  function savePage(){ const p=pages[state.index]; p.country=$('editCountry').value.trim() || 'Unreviewed pages'; p.heading=$('editHeading').value.trim(); p.status=$('editStatus').value; p.description=$('editNotes').value.trim(); const saved=JSON.parse(localStorage.getItem('stamp-research-pages') || '{}'); saved._version=window.STAMP_RESEARCH_VERSION; saved[p.sequence]={country:p.country,heading:p.heading,status:p.status,description:p.description}; localStorage.setItem('stamp-research-pages',JSON.stringify(saved)); applyFilters(); openModal(state.index); }
+  function closeModal(){ $('modal').classList.add('hidden'); }
+  function setResearchMode(active){ state.researchMode=active; $('researchMode').textContent=active?'Exit research mode':'Research mode'; $('researchMode').classList.toggle('active',active); $('search').value=''; $('statusFilter').value=active?'unreviewed':'all'; applyFilters(); if(active){ showPages(); if(state.filtered.length) openModal(pages.indexOf(state.filtered[0])); } else { $('pageView').classList.add('hidden'); $('countryView').classList.remove('hidden'); document.querySelector('[data-view="countries"]').classList.add('active'); document.querySelector('[data-view="pages"]').classList.remove('active'); closeModal(); } }
+  $('imageCanvas').addEventListener('wheel',e=>{ e.preventDefault(); const direction=e.deltaY<0?1:-1; state.zoom=Math.min(5,Math.max(1,state.zoom+direction*.25)); if(state.zoom===1){state.panX=0;state.panY=0;} applyCanvasTransform(); },{passive:false});
+  $('imageCanvas').addEventListener('pointerdown',e=>{ if(state.zoom===1)return; state.dragging=true; state.dragStartX=e.clientX-state.panX; state.dragStartY=e.clientY-state.panY; $('imageCanvas').setPointerCapture(e.pointerId); $('imageCanvas').classList.add('is-panning'); });
+  $('imageCanvas').addEventListener('pointermove',e=>{ if(!state.dragging)return; state.panX=e.clientX-state.dragStartX; state.panY=e.clientY-state.dragStartY; applyCanvasTransform(); });
+  $('imageCanvas').addEventListener('pointerup',e=>{ state.dragging=false; $('imageCanvas').releasePointerCapture?.(e.pointerId); $('imageCanvas').classList.remove('is-panning'); });
+  $('imageCanvas').addEventListener('pointercancel',()=>{state.dragging=false; $('imageCanvas').classList.remove('is-panning');}); $('resetZoom').addEventListener('click',resetCanvas);
+  $('exportResearch').addEventListener('click',exportResearch); $('importResearch').addEventListener('change',e=>importResearch(e.target.files[0])); $('researchMode').addEventListener('click',()=>setResearchMode(!state.researchMode)); $('viewStamps').addEventListener('click',()=>$('stampPanel').scrollIntoView({behavior:'smooth',block:'nearest'})); $('savePage').addEventListener('click',savePage); $('search').addEventListener('input',applyFilters); $('statusFilter').addEventListener('change',applyFilters); document.querySelectorAll('[data-view]').forEach(b=>b.addEventListener('click',()=>{ document.querySelectorAll('[data-view]').forEach(x=>x.classList.remove('active')); b.classList.add('active'); if(b.dataset.view==='pages') showPages(); else {$('pageView').classList.add('hidden');$('countryView').classList.remove('hidden');} })); document.querySelectorAll('[data-close]').forEach(x=>x.addEventListener('click',closeModal)); $('previousPage').addEventListener('click',()=>openModal((state.index-1+pages.length)%pages.length)); $('nextPage').addEventListener('click',()=>openModal((state.index+1)%pages.length)); document.addEventListener('keydown',e=>{if(e.key==='Escape')closeModal();}); renderStats(); applyFilters();
+})();

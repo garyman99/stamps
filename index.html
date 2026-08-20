@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Grandpa's Stamp Album</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="app-shell">
+    <aside class="sidebar">
+      <div class="brand-mark">✦</div>
+      <div class="eyebrow">Family archive · 1971 album</div>
+      <h1>Grandpa’s<br><em>Stamp Album</em></h1>
+      <p class="intro">A living catalog of the collection inherited from a postman and serviceman.</p>
+      <div class="stats" id="stats"></div>
+      <div class="side-note">The original album pages stay at the center of every record. Research can grow around them.</div>
+    </aside>
+    <main class="main-content">
+      <header class="topbar">
+        <div>
+          <div class="eyebrow">World stamp album · H. E. Harris & Co.</div>
+          <h2>Browse the collection</h2>
+        </div>
+        <div class="toolbar">
+          <label class="search"><span>⌕</span><input id="search" type="search" placeholder="Search country, page, year…" /></label>
+          <select id="statusFilter" aria-label="Filter by research status"><option value="all">All statuses</option><option value="unreviewed">Needs review</option><option value="reviewed">Reviewed</option></select>
+          <button class="research-button" id="researchMode">Research mode</button><button class="data-button" id="exportResearch">Export</button><label class="import-button">Import<input id="importResearch" type="file" accept="application/json,.json" /></label>
+        </div>
+      </header>
+      <section class="hero-card">
+        <div><span class="pill">Collection overview</span><h3>A careful record of a<br><em>well-loved book.</em></h3><p>Start with the album’s own order, then add country, stamp identity, condition, and market evidence as we research.</p></div>
+        <div class="hero-number"><strong id="heroCount">248</strong><span>photographed<br>pages</span></div>
+      </section>
+      <section class="section-heading"><div><span class="eyebrow">Navigate</span><h3>Countries & sections</h3></div><div class="view-toggle"><button class="active" data-view="countries">Countries</button><button data-view="pages">All pages</button></div></section>
+      <section id="countryView" class="country-grid"></section>
+      <section id="pageView" class="page-grid hidden"></section>
+    </main>
+  </div>
+  <div id="modal" class="modal hidden" role="dialog" aria-modal="true" aria-label="Album page viewer"><div class="modal-backdrop" data-close></div><div class="modal-card"><button class="close" data-close aria-label="Close viewer">×</button><div class="modal-image-wrap" id="imageCanvas"><div class="image-stage"><img id="modalImage" alt="Album page" draggable="false" /></div><div class="canvas-toolbar"><span id="canvasLabel">Full page</span><button class="canvas-reset" id="resetZoom" type="button">Reset view</button><span>Scroll to zoom · drag to pan</span></div></div><div class="modal-info"><span class="pill" id="modalStatus">Needs review</span><div class="eyebrow" id="modalSequence"></div><h3 id="modalTitle"></h3><p id="modalDescription"></p><div class="detail-grid"><div><span>Country</span><strong id="modalCountry"></strong></div><div><span>Research status</span><strong id="modalResearch"></strong></div></div><div class="research-form"><div class="form-title">Page research</div><label>Country<input id="editCountry" placeholder="e.g. Hungary" /></label><label>Heading / year range<input id="editHeading" placeholder="e.g. 1965–70 · Air Post" /></label><label>Status<select id="editStatus"><option value="unreviewed">Needs review</option><option value="reviewed">Reviewed</option></select></label><label>Notes<textarea id="editNotes" rows="3" placeholder="Transcription, condition, or research notes…"></textarea></label><button class="primary" id="savePage">Save page <span>✓</span></button></div><div id="stampPanel" class="stamp-panel hidden"></div><div class="modal-actions"><button class="secondary" id="viewStamps">View individual stamps</button><button class="secondary" id="previousPage">← Previous</button><button class="secondary" id="nextPage">Next page <span>→</span></button></div></div></div></div>
+  <script src="data/pages.js"></script><script src="data/page-research.js"></script><script src="data/stamps.js"></script><script src="app.js"></script>
+</body>
+</html>
