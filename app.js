@@ -1,6 +1,8 @@
 (function(){
   const pages = window.STAMP_PAGES || [];
-  const stampRecords = window.STAMP_RECORDS || [];
+  const pricingById = Object.fromEntries((window.STAMP_PRICING_CHINA || []).map(x => [x.id, x]));
+  const stampRecords = [...(window.STAMP_RECORDS || []), ...(window.STAMP_RECORDS_AUTO || [])].map(record => ({ ...record, ...(pricingById[record.id] || {}) }));
+  const stampCandidates = window.STAMP_CANDIDATES || [];
   try { const saved = JSON.parse(localStorage.getItem('stamp-research-pages') || '{}'); if (saved._version === window.STAMP_RESEARCH_VERSION) pages.forEach(p => Object.assign(p, saved[p.sequence] || {})); } catch (e) { console.warn('Research data could not be loaded', e); }
   const $ = (id) => document.getElementById(id);
   const state = { filtered: pages.slice(), index: 0, researchMode: false, zoom: 1, panX: 0, panY: 0, dragging: false, dragStartX: 0, dragStartY: 0 };
@@ -12,14 +14,20 @@
   function resetCanvas(){ state.zoom=1; state.panX=0; state.panY=0; applyCanvasTransform(); }
   function setCanvasImage(src, alt, label){ $('modalImage').src=src; $('modalImage').alt=alt; $('canvasLabel').textContent=label; resetCanvas(); }
   function selectStamp(record){ setCanvasImage(record.image, `${record.country} ${record.denomination}`, `${record.country} · ${record.denomination}`); document.querySelectorAll('.stamp-card').forEach(card=>card.classList.toggle('selected', card.dataset.stampId===record.id)); }
+  function selectCandidate(record){ setCanvasImage(record.image, `Unconfirmed candidate from page ${record.pageSequence}`, `Candidate · page ${record.pageSequence}`); document.querySelectorAll('.candidate-card').forEach(card=>card.classList.toggle('selected', card.dataset.candidateId===record.id)); }
+  function renderSources(s){ return s.sources?.length ? `<div class="stamp-sources"><b>Sources</b>${s.sources.map(src=>`<a href="${src.url}" target="_blank" rel="noopener noreferrer" title="${src.use}">${src.title} ↗</a>`).join('')}</div>` : ''; }
   function renderStampPanel(p){
     const records=stampRecords.filter(s=>s.pageSequence===p.sequence && s.status==='visible');
+    const promotedIds=new Set(stampRecords.map(s=>s.id));
+    const candidates=stampCandidates.filter(s=>s.pageSequence===p.sequence && !promotedIds.has(s.id));
     const panel=$('stampPanel'), button=$('viewStamps');
-    button.classList.toggle('hidden', !records.length);
-    if(!records.length){ panel.classList.add('hidden'); panel.innerHTML=''; return; }
+    button.classList.toggle('hidden', !records.length && !candidates.length);
+    if(!records.length && !candidates.length){ panel.classList.add('hidden'); panel.innerHTML=''; return; }
     panel.classList.remove('hidden');
-    panel.innerHTML=`<div class="form-title">Visible stamp records · ${records.length}</div><p class="stamp-intro">Only visibly present stamp or reference illustrations are extracted. Empty album spaces are intentionally omitted. Potential values are research estimates, not appraisals; condition, gum, perforation, cancellations, authenticity, and buyer demand can change them substantially. Click a stamp to inspect it in the canvas.</p><div class="stamp-grid">${records.map(s=>`<article class="stamp-card" data-stamp-id="${s.id}" role="button" tabindex="0" aria-label="View ${s.country} ${s.denomination}"><img src="${s.image}" alt="${s.country} ${s.denomination}"/><div><strong>${s.denomination}</strong><span>${s.status}</span>${s.valuation ? `<p class="stamp-value"><b>Potential value</b> · ${s.valuation} <em>(${s.valueConfidence} confidence)</em></p>` : ''}<p>${s.notes}</p></div></article>`).join('')}</div>`;
-    panel.querySelectorAll('.stamp-card').forEach(card=>{ const record=records.find(s=>s.id===card.dataset.stampId); card.addEventListener('click',()=>selectStamp(record)); card.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();selectStamp(record);}}); });
+    panel.innerHTML=`${records.length ? `<div class="form-title">Visible stamp records · ${records.length}</div><p class="stamp-intro">Click a stamp to inspect it in the canvas. Values are screening estimates until the exact issue is confirmed.</p><div class="stamp-grid">${records.map(s=>`<article class="stamp-card" data-stamp-id="${s.id}" role="button" tabindex="0" aria-label="View ${s.country} ${s.denomination}"><img src="${s.image}" alt="${s.country} ${s.denomination}"/><div><strong>${s.denomination}</strong><span>${s.status}</span>${s.valuation ? `<p class="stamp-value"><b>Potential value</b> · ${s.valuation} <em>(${s.valueConfidence} confidence)</em></p><p class="stamp-value-basis">${s.valuationBasis}</p>${renderSources(s)}` : ''}<p>${s.notes}</p></div></article>`).join('')}</div>` : ''}${candidates.length ? `<button class="secondary candidate-toggle" id="reviewCandidates" type="button">Review ${candidates.length} unconfirmed detections</button><div id="candidateReview" class="hidden"><p class="stamp-intro">These are automated color-likely detections. They may still include album material or printed illustrations and are not part of the collection until confirmed.</p><div class="stamp-grid">${candidates.map(s=>`<article class="stamp-card candidate-card" data-candidate-id="${s.id}" role="button" tabindex="0" aria-label="View unconfirmed candidate ${s.id}"><img src="${s.image}" alt="Unconfirmed candidate from page ${s.pageSequence}"/><div><strong>Candidate ${s.id.split('-').pop()}</strong><span>unconfirmed</span><p>Color score · ${s.coloredFraction}; SAM ${s.score}</p></div></article>`).join('')}</div></div>` : ''}`;
+    panel.querySelectorAll('.stamp-card:not(.candidate-card)').forEach(card=>{ const record=records.find(s=>s.id===card.dataset.stampId); card.addEventListener('click',()=>selectStamp(record)); card.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();selectStamp(record);}}); });
+    panel.querySelectorAll('.candidate-card').forEach(card=>{ const record=candidates.find(s=>s.id===card.dataset.candidateId); card.addEventListener('click',()=>selectCandidate(record)); card.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();selectCandidate(record);}}); });
+    panel.querySelector('#reviewCandidates')?.addEventListener('click',()=>panel.querySelector('#candidateReview').classList.toggle('hidden'));
   }
   function renderStats(){
     const countries = new Set(pages.map(getCountry));
